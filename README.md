@@ -1,84 +1,74 @@
 # Spring Next Store
 
-Full-stack e-commerce: **Spring Boot 3** REST API + **Next.js 15** storefront and admin panel.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4-6DB33F?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=next.js)](https://nextjs.org/)
 
-**Author:** Dhairya Singh
+Full-stack **e-commerce** demo: a **Spring Boot 3** REST API and a **Next.js 15** storefront with an **admin** area. JWT-secured API, JPA + MySQL, client-side cart, and order flow.
 
-**Repository:** [github.com/singhdhairya17/spring-next-store](https://github.com/singhdhairya17/spring-next-store)  
-If you use a different repo name on GitHub, update this line and `GITHUB_LINK.txt`.
-
----
-
-## Publish to GitHub (fresh remote)
-
-1. On GitHub: **delete** the old repository (Settings → Danger zone → Delete this repository), if you no longer want it.
-2. Create a **new empty** repository (no README/license/gitignore). Suggested name: **`spring-next-store`**.
-3. In your project folder:
-
-```powershell
-git remote remove origin
-git remote add origin https://github.com/singhdhairya17/spring-next-store.git
-git push -u origin main
-```
-
-Use your real username/repo in the URL if different.
+**Live repo:** [github.com/singhdhairya17/spring-next-store](https://github.com/singhdhairya17/spring-next-store) · **Author:** Dhairya Singh
 
 ---
 
-## Overview
+## Table of contents
 
-| Module | Path | Description |
-|--------|------|-------------|
-| **API** | [`e-commerce/`](./e-commerce/) | REST API, JWT auth, JPA, MySQL, file uploads |
-| **Web** | [`frontend-ecommerce/`](./frontend-ecommerce/) | Next.js App Router — shop + `/admin` |
+- [Architecture](#architecture)
+- [Tech stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Configuration](#configuration)
+- [Run locally](#run-locally)
+- [Production builds](#production-builds)
+- [Project structure](#project-structure)
+- [Features](#features)
+- [Contributing](#contributing)
+- [License](#license)
 
-Start the API first, then the frontend. The UI talks to the API via `NEXT_PUBLIC_BACKEND_URL`.
+---
+
+## Architecture
+
+| Layer | Directory | Role |
+|--------|-----------|------|
+| **API** | [`e-commerce/`](./e-commerce/) | REST endpoints, JWT, Spring Data JPA, file uploads |
+| **Web** | [`frontend-ecommerce/`](./frontend-ecommerce/) | Next.js App Router — public shop + `/admin` |
+
+Run the **API first**, then the **frontend**. The UI calls the backend using `NEXT_PUBLIC_BACKEND_URL` (see [Configuration](#configuration)).
 
 ---
 
 ## Tech stack
 
-**Backend**
+**Backend:** Java 21 · Spring Boot 3.4 · Maven · Spring Security · Spring Data JPA · MySQL  
 
-- Java **21**, Spring Boot **3.4**, Maven  
-- Spring Security (JWT), Spring Data JPA  
-- MySQL  
-
-**Frontend**
-
-- Next.js **15**, React **19**, TypeScript  
-- Tailwind CSS, HeroUI, Framer Motion  
-- npm / pnpm
+**Frontend:** Next.js 15 · React 19 · TypeScript · Tailwind CSS · HeroUI · Framer Motion  
 
 ---
 
 ## Prerequisites
 
-- **JDK 21** (Spring Boot 3.4) — IntelliJ: set **Project SDK** to 21  
-- **Node.js** 18+ (20+ recommended)  
-- **MySQL** 8+ (local or remote)
+- **JDK 21** (set as Project SDK in IntelliJ / `JAVA_HOME`)
+- **Node.js** 18+ (20+ recommended)
+- **MySQL** 8+
 
 ---
 
 ## Configuration
 
-### Database (backend)
+### Backend (MySQL)
 
-Edit [`e-commerce/src/main/resources/application.properties`](./e-commerce/src/main/resources/application.properties) or set environment variables.
+Edit [`e-commerce/src/main/resources/application.properties`](./e-commerce/src/main/resources/application.properties). The datasource password defaults to `changeme` unless you set:
 
-Default password uses a placeholder; override with:
-
-```bash
+```powershell
 # Windows PowerShell
-$env:MYSQL_PASSWORD = "your_real_password"
-
-# macOS / Linux
-export MYSQL_PASSWORD=your_real_password
+$env:MYSQL_PASSWORD = "your_password"
 ```
 
-Or replace `${MYSQL_PASSWORD:changeme}` in `application.properties` locally (do not commit real credentials).
+```bash
+# macOS / Linux
+export MYSQL_PASSWORD=your_password
+```
 
-See also [`application.properties.example`](./e-commerce/src/main/resources/application.properties.example).
+Do **not** commit real credentials. See [`application.properties.example`](./e-commerce/src/main/resources/application.properties.example).
 
 ### Frontend
 
@@ -93,47 +83,36 @@ cp .envexample .env.local
 NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
 ```
 
-(No trailing slash required; the app normalizes the base URL.)
-
 ---
 
 ## Run locally
 
-### 1. MySQL
+1. **MySQL** — Ensure a database exists for your JDBC URL (e.g. `ecommerce-db`; `createDatabaseIfNotExist` may apply depending on server settings).
 
-Create database `ecommerce-db` (or match your JDBC URL). The URL in properties can create the DB if the server allows it.
+2. **API**
 
-### 2. API
+   ```bash
+   cd e-commerce
+   ./mvnw spring-boot:run
+   ```
 
-```bash
-cd e-commerce
-./mvnw spring-boot:run
-```
+   Windows: `.\mvnw.cmd spring-boot:run`  
+   API base URL: **http://localhost:8080**
 
-**Windows:**
+3. **Web**
 
-```powershell
-cd e-commerce
-.\mvnw.cmd spring-boot:run
-```
+   ```bash
+   cd frontend-ecommerce
+   npm install
+   npm run dev
+   ```
 
-API: **http://localhost:8080**
-
-### 3. Frontend
-
-```bash
-cd frontend-ecommerce
-npm install
-npm run dev
-```
-
-Or with pnpm: `pnpm install` && `pnpm dev`
-
-App: **http://localhost:3000**
+   Or: `pnpm install` && `pnpm dev`  
+   App: **http://localhost:3000**
 
 ---
 
-## Production build
+## Production builds
 
 **API**
 
@@ -151,21 +130,21 @@ npm run build
 npm start
 ```
 
-Set `NEXT_PUBLIC_BACKEND_URL` to your deployed API URL. Configure CORS / security on the API for your web origin.
+Point `NEXT_PUBLIC_BACKEND_URL` at your deployed API and allow your web **origin** in API CORS / security settings.
 
 ---
 
-## Project layout
+## Project structure
 
 ```
-SPRING_NEXT_STORE/
-├── e-commerce/                 # Spring Boot API
+spring-next-store/
+├── e-commerce/                    # Spring Boot API
 │   ├── pom.xml
 │   └── src/main/java/com/dhairyasingh/ecommerce/
-│   └── src/main/resources/application.properties
-├── frontend-ecommerce/         # Next.js app
-│   ├── src/app/(user)/         # Storefront
-│   ├── src/app/(admin)/        # Admin
+│   └── src/main/resources/
+├── frontend-ecommerce/              # Next.js
+│   ├── src/app/(user)/             # Storefront routes
+│   ├── src/app/(admin)/            # Admin routes
 │   ├── src/components/
 │   └── package.json
 ├── LICENSE
@@ -176,20 +155,20 @@ SPRING_NEXT_STORE/
 
 ## Features
 
-- Storefront: categories, products, product detail, cart, register/login, orders  
-- Admin: dashboard stats, products & categories CRUD (admin role)  
-- JWT-based API security; static uploads under configured `upload.path`
+- **Storefront:** categories, catalog, product detail, cart (local storage), register / login, checkout flow  
+- **Admin:** dashboard metrics, CRUD for products and categories (admin role)  
+- **API:** JWT authentication, role-based access, static uploads via configured `upload.path`
 
 ---
 
 ## Contributing
 
-1. Fork the repo and create a branch.  
-2. Keep commits focused; follow existing style.  
-3. Open a PR with a short description and how you tested.
+1. Fork the repository and create a feature branch.  
+2. Keep commits focused; match existing style.  
+3. Open a pull request describing changes and how you tested.
 
 ---
 
 ## License
 
-[MIT License](./LICENSE)
+This project is licensed under the [MIT License](./LICENSE).
