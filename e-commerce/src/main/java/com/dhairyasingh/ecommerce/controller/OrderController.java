@@ -1,0 +1,80 @@
+package com.dhairyasingh.ecommerce.controller;
+
+import com.dhairyasingh.ecommerce.dto.OrderProductRequest;
+import com.dhairyasingh.ecommerce.dto.OrderRequest;
+import com.dhairyasingh.ecommerce.dto.UserResponse;
+import com.dhairyasingh.ecommerce.exceptions.AppException;
+import com.dhairyasingh.ecommerce.model.Order;
+import com.dhairyasingh.ecommerce.model.OrderProduct;
+import com.dhairyasingh.ecommerce.model.Product;
+import com.dhairyasingh.ecommerce.model.User;
+import com.dhairyasingh.ecommerce.service.OrderService;
+import com.dhairyasingh.ecommerce.service.ProductService;
+import com.dhairyasingh.ecommerce.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+@RestController
+@RequestMapping("/api")
+public class OrderController {
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private ProductService productService;
+
+    @PostMapping("/order/confirm")
+    public ResponseEntity<?> confirmOrder(@RequestBody OrderRequest orderRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        UserResponse userResponse = (UserResponse) authentication.getPrincipal();
+        User user = userResponse.getUser();
+
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        Order order = Order.builder()
+                .user(user)
+                .totalPrice(totalPrice)
+                .build();
+        Order savedOrder = orderService.save(order);
+
+        Set<OrderProduct> orderProducts = new HashSet<>();
+        for (OrderProductRequest orderProductRequest : orderRequest.getOrderProducts()) {
+            Product product = productService.getProductById(orderProductRequest.getProductId())
+                    .orElseThrow(() -> new AppException("Product not found", HttpStatus.BAD_REQUEST));
+            totalPrice = totalPrice.add(product.getPrice().multiply(BigDecimal.valueOf(orderProductRequest.getQuantity())));
+            OrderProduct orderProduct = OrderProduct.builder()
+                    .product(product)
+                    .order(savedOrder)
+                    .quantity(orderProductRequest.getQuantity())
+                    .build();
+            orderProducts.add(orderProduct);
+        }
+
+
+        savedOrder.setOrderProducts(orderProducts);
+        savedOrder.setTotalPrice(totalPrice);
+        orderService.save(savedOrder);
+
+        return ResponseEntity.ok(Map.of("orderId", order.getId()));
+    }
+
+    @GetMapping("/order/{id}")
+    public ResponseEntity<Order> getOneOrder(@PathVariable String id)
+    {
+        return ResponseEntity.ok(orderService.getOrder(id));
+    }
+}

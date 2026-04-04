@@ -1,0 +1,17 @@
+# Copy to application.properties and adjust, or set env MYSQL_PASSWORD.
+
+spring.application.name=spring-next-store-api
+spring.h2.console.enabled=true
+spring.datasource.url=jdbc:mysql://localhost:3306/ecommerce-db?createDatabaseIfNotExist=true
+spring.datasource.username=root
+spring.datasource.password=${MYSQL_PASSWORD:changeme}
+server.servlet.context-path=/
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+spring.main.allow-circular-references=true
+spring.servlet.multipart.enabled=true
+spring.servlet.multipart.max-file-size=5MB
+spring.servlet.multipart.max-request-size=10MB
+upload.path=uploads/
+spring.web.resources.static-locations=file:uploads/

@@ -1,0 +1,32 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend
+e-commerce/target/
+e-commerce/uploads/
+*.log
+
+# Frontend
+frontend-ecommerce/node_modules/
+frontend-ecommerce/.next/
+frontend-ecommerce/out/
+frontend-ecommerce/.env.local
+frontend-ecommerce/.env*.local
+
+# Accidental root npm lockfile (use frontend-ecommerce/)
+/package-lock.json
+
+# Misc
+*.class
+*.jar
+!e-commerce/mvnw
+!e-commerce/mvnw.cmd
+!e-commerce/.mvn/wrapper/maven-wrapper.jar
