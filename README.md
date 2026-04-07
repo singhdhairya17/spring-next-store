@@ -17,6 +17,7 @@ Full-stack **e-commerce** demo: a **Spring Boot 3** REST API and a **Next.js 15*
 - [Prerequisites](#prerequisites)
 - [Configuration](#configuration)
 - [Run locally](#run-locally)
+- [Tests](#tests)
 - [Production builds](#production-builds)
 - [Project structure](#project-structure)
 - [Features](#features)
@@ -87,7 +88,7 @@ NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
 
 ## Run locally
 
-1. **MySQL** — Ensure a database exists for your JDBC URL (e.g. `ecommerce-db`; `createDatabaseIfNotExist` may apply depending on server settings).
+1. **MySQL** — Ensure a database exists for your JDBC URL (e.g. `ecommerce-db`; `createDatabaseIfNotExist` may apply depending on server settings). Set **`MYSQL_PASSWORD`** (or edit [`application.properties`](./e-commerce/src/main/resources/application.properties) locally **without committing** secrets).
 
 2. **API**
 
@@ -96,7 +97,12 @@ NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
    ./mvnw spring-boot:run
    ```
 
-   Windows: `.\mvnw.cmd spring-boot:run`  
+   **Windows PowerShell:** use the wrapper with an explicit path (`mvnw` alone is not on `PATH`):
+
+   ```powershell
+   .\mvnw.cmd spring-boot:run
+   ```
+
    API base URL: **http://localhost:8080**
 
 3. **Web**
@@ -112,13 +118,28 @@ NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
 
 ---
 
+## Tests
+
+The backend uses **in-memory H2** during **`mvn test`** (see [`e-commerce/src/test/resources/application.properties`](./e-commerce/src/test/resources/application.properties)), so you do **not** need MySQL running to execute the suite.
+
+- **IntelliJ:** use JDK **21** as Project SDK and for **Maven → Runner → JRE**, then run all tests in `e-commerce`.
+- **Command line (Windows):** ensure `java -version` is **21**, then from `e-commerce`:
+
+  ```powershell
+  .\mvnw.cmd test
+  ```
+
+Included checks: **`@SpringBootTest`** context load, **MockMvc** tests for **`POST /api/register`** (valid **201** / invalid **400**), **Bean Validation** on signup DTO, and **`MethodArgumentNotValidException`** handling in [`RestExceptionHandler`](./e-commerce/src/main/java/com/dhairyasingh/ecommerce/config/RestExceptionHandler.java).
+
+---
+
 ## Production builds
 
 **API**
 
 ```bash
 cd e-commerce
-./mvnw clean package
+./mvnw clean package   # Windows: .\mvnw.cmd clean package
 java -jar target/e-commerce-0.0.1-SNAPSHOT.jar
 ```
 
@@ -140,8 +161,9 @@ Point `NEXT_PUBLIC_BACKEND_URL` at your deployed API and allow your web **origin
 spring-next-store/
 ├── e-commerce/                    # Spring Boot API
 │   ├── pom.xml
-│   └── src/main/java/com/dhairyasingh/ecommerce/
-│   └── src/main/resources/
+│   ├── src/main/java/com/dhairyasingh/ecommerce/
+│   ├── src/main/resources/
+│   └── src/test/                  # H2-backed tests, MockMvc
 ├── frontend-ecommerce/              # Next.js
 │   ├── src/app/(user)/             # Storefront routes
 │   ├── src/app/(admin)/            # Admin routes
@@ -157,7 +179,7 @@ spring-next-store/
 
 - **Storefront:** categories, catalog, product detail, cart (local storage), register / login, checkout flow  
 - **Admin:** dashboard metrics, CRUD for products and categories (admin role)  
-- **API:** JWT authentication, role-based access, static uploads via configured `upload.path`
+- **API:** JWT authentication, role-based access, static uploads via configured `upload.path`; **Bean Validation** on sign-up (`@Valid` + Jakarta constraints); global validation error responses via `@ControllerAdvice`
 
 ---
 

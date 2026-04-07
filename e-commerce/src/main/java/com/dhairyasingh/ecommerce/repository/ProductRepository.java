@@ -18,6 +18,6 @@ public interface ProductRepository extends JpaRepository<Product, String> {
 
     @Query("SELECT p FROM Product p WHERE p.active = true")
     List<Product> findActiveProducts();
-    @Query(value = "SELECT * FROM Products p ORDER BY p.created_at DESC LIMIT :limit", nativeQuery = true)
+    @Query(value = "SELECT * FROM products p ORDER BY p.created_at DESC LIMIT :limit", nativeQuery = true)
     List<Product> findLatestProducts(@Param("limit") int limit);
 }

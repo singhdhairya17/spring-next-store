@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.net.URI;
 
@@ -52,7 +53,7 @@ public class AuthController {
         return ResponseEntity.ok(user);
     }
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody UserSignUpRequest userSignUpRequest)
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody UserSignUpRequest userSignUpRequest)
     {
         UserResponse user = userService.register(userSignUpRequest);
         user.setToken(authProvider.createToken(user));
